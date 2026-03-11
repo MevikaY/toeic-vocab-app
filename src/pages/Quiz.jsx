@@ -18,34 +18,24 @@ export default function Quiz() {
     const [dailyTarget, setDailyTarget] = useState(0);
     const [practicedToday, setPracticedToday] = useState(0);
 
-    // 🌟 State ใหม่สำหรับควบคุมโหมดการฝึกซ้อม (false = Daily Cap, true = Practice All)
-    const [isEndlessMode, setIsEndlessMode] = useState(false);
+    // 🌟 State ใหม่! เปลี่ยนมาใช้ตัวแปรเดียวเพื่อควบคุม 3 โหมด ('daily', 'all', 'today')
+    const [quizMode, setQuizMode] = useState('daily');
 
     useEffect(() => {
         fetchWordsAndStats();
     }, []);
 
-    // เมื่อเปลี่ยน Filter ให้ดึงคำถามใหม่ (ถ้ายังไม่ถึงลิมิต หรืออยู่ในโหมด Practice All)
+    // 🌟 เมื่อเปลี่ยนโหมด หรือเปลี่ยนฟิลเตอร์ ให้ดึงคำถามใหม่ทันที
     useEffect(() => {
         if (vocabList.length > 0) {
-            if (isEndlessMode || practicedToday < dailyTarget) {
-                generateQuestion(vocabList, selectedCategory, selectedPOS);
-            }
-        }
-    }, [selectedCategory, selectedPOS]);
-
-    // 🌟 ตรวจจับการสลับโหมด ถ้าเปลี่ยนเป็น Practice All ให้สุ่มโจทย์ขึ้นมาทันที
-    useEffect(() => {
-        if (vocabList.length > 0) {
-            if (isEndlessMode && !currentQuestion) {
-                setMessage('');
-                generateQuestion(vocabList, selectedCategory, selectedPOS);
-            } else if (!isEndlessMode && practicedToday >= dailyTarget) {
+            if (quizMode === 'daily' && practicedToday >= dailyTarget) {
                 setCurrentQuestion(null);
-                setMessage('🎉 ยินดีด้วย! คุณฝึกคำศัพท์ครบเป้าหมาย 50% ของวันนี้แล้วครับ (สามารถสลับเป็นโหมด Practice All เพื่อฝึกต่อได้)');
+                setMessage('🎉 ยินดีด้วย! คุณฝึกคำศัพท์ครบเป้าหมาย 50% ของวันนี้แล้วครับ (เลือกโหมดอื่นด้านบนเพื่อฝึกต่อได้เลย)');
+            } else {
+                generateQuestion(vocabList, selectedCategory, selectedPOS, quizMode);
             }
         }
-    }, [isEndlessMode]);
+    }, [selectedCategory, selectedPOS, quizMode]);
 
     async function fetchWordsAndStats() {
         const { data: wordsData, error: wordsError } = await supabase.from('vocabularies').select('*');
@@ -76,29 +66,42 @@ export default function Quiz() {
             const currentPracticed = todayCount || 0;
             setPracticedToday(currentPracticed);
 
-            // 🌟 เช็คโหมดก่อนเริ่มเกม
-            if (currentPracticed < Math.ceil(cleanData.length / 2) || isEndlessMode) {
-                generateQuestion(cleanData, 'All', 'All');
+            if (currentPracticed < Math.ceil(cleanData.length / 2)) {
+                generateQuestion(cleanData, 'All', 'All', 'daily');
             } else {
-                setMessage('🎉 ยินดีด้วย! คุณฝึกคำศัพท์ครบเป้าหมาย 50% ของวันนี้แล้วครับ (สามารถสลับเป็นโหมด Practice All เพื่อฝึกต่อได้)');
+                setMessage('🎉 ยินดีด้วย! คุณฝึกคำศัพท์ครบเป้าหมาย 50% ของวันนี้แล้วครับ (เลือกโหมดอื่นด้านบนเพื่อฝึกต่อได้เลย)');
             }
         }
     }
 
-    function generateQuestion(allWords, filterCat, filterPOS) {
+    // 🌟 ฟังก์ชันสุ่มคำถามที่ฉลาดขึ้น (รองรับโหมด Today)
+    function generateQuestion(allWords, filterCat, filterPOS, currentMode) {
         let filteredWords = allWords;
 
+        // 🌟 ด่านที่ 0: ถ้าเลือกโหมด Today ให้กรองเฉพาะคำที่เพิ่ม "วันนี้"
+        if (currentMode === 'today') {
+            const todayString = new Date().toDateString(); // ดึงวันที่ปัจจุบัน
+            filteredWords = filteredWords.filter(w => new Date(w.created_at).toDateString() === todayString);
+        }
+
+        // ด่านที่ 1: กรองหมวดหมู่
         if (filterCat !== 'All') {
             filteredWords = filteredWords.filter(w => w.category === filterCat);
         }
 
+        // ด่านที่ 2: กรอง POS
         if ((filterCat === 'All' || filterCat === 'Word') && filterPOS !== 'All') {
             filteredWords = filteredWords.filter(w => w.part_of_speech === filterPOS);
         }
 
+        // เช็คว่ามีศัพท์พอให้สร้างช้อยส์ไหม (ต้องมีอย่างน้อย 4 คำ)
         if (filteredWords.length < 4) {
             setCurrentQuestion(null);
-            setMessage(`หมวดหมู่นี้มีข้อมูลไม่ถึง 4 คำ (มีแค่ ${filteredWords.length} คำ) ไปเพิ่มข้อมูลก่อนนะครับ!`);
+            if (currentMode === 'today') {
+                setMessage(`วันนี้คุณเพิ่งเพิ่มข้อมูลหมวดนี้ไป ${filteredWords.length} คำ (ต้องมีอย่างน้อย 4 คำถึงจะเริ่มควิซได้ครับ) ไปหน้า Add Word ก่อนนะ!`);
+            } else {
+                setMessage(`หมวดหมู่นี้มีข้อมูลไม่ถึง 4 คำ (มีแค่ ${filteredWords.length} คำ) ไปเพิ่มข้อมูลก่อนนะครับ!`);
+            }
             return;
         }
 
@@ -132,13 +135,13 @@ export default function Quiz() {
         const newPracticedCount = practicedToday + 1;
         setPracticedToday(newPracticedCount);
 
-        // 🌟 เช็คว่าควรหยุดเกมไหม (ถ้าถึงลิมิต และไม่ได้เปิดโหมด Endless)
         setTimeout(() => {
-            if (newPracticedCount >= dailyTarget && !isEndlessMode) {
+            // หยุดเกมถ้าโหมด Daily เป้าหมายครบแล้ว
+            if (newPracticedCount >= dailyTarget && quizMode === 'daily') {
                 setCurrentQuestion(null);
-                setMessage('🎉 ยินดีด้วย! คุณฝึกคำศัพท์ครบเป้าหมาย 50% ของวันนี้แล้วครับ (สามารถสลับเป็นโหมด Practice All เพื่อฝึกต่อได้)');
+                setMessage('🎉 ยินดีด้วย! คุณฝึกคำศัพท์ครบเป้าหมาย 50% ของวันนี้แล้วครับ (เลือกโหมดอื่นด้านบนเพื่อฝึกต่อได้เลย)');
             } else {
-                generateQuestion(vocabList, selectedCategory, selectedPOS);
+                generateQuestion(vocabList, selectedCategory, selectedPOS, quizMode);
             }
         }, 2000);
     }
@@ -152,42 +155,55 @@ export default function Quiz() {
 
             <div style={{ maxWidth: '650px', margin: '40px auto', textAlign: 'center', backgroundColor: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
 
-                {/* 🌟 ปุ่มสลับโหมดการฝึกซ้อม */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '25px' }}>
+                {/* 🌟 3 ปุ่ม ควบคุมโหมดการเล่น */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
                     <button
-                        onClick={() => setIsEndlessMode(false)}
+                        onClick={() => setQuizMode('daily')}
                         style={{
                             padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease',
                             border: '2px solid #0056b3',
-                            backgroundColor: !isEndlessMode ? '#0056b3' : '#ffffff',
-                            color: !isEndlessMode ? '#ffffff' : '#0056b3'
+                            backgroundColor: quizMode === 'daily' ? '#0056b3' : '#ffffff',
+                            color: quizMode === 'daily' ? '#ffffff' : '#0056b3'
                         }}
                     >
                         🎯 Daily Goal (50%)
                     </button>
+
                     <button
-                        onClick={() => setIsEndlessMode(true)}
+                        onClick={() => setQuizMode('all')}
                         style={{
                             padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease',
                             border: '2px solid #28a745',
-                            backgroundColor: isEndlessMode ? '#28a745' : '#ffffff',
-                            color: isEndlessMode ? '#ffffff' : '#28a745'
+                            backgroundColor: quizMode === 'all' ? '#28a745' : '#ffffff',
+                            color: quizMode === 'all' ? '#ffffff' : '#28a745'
                         }}
                     >
                         ♾️ Practice All
                     </button>
+
+                    {/* ปุ่มใหม่สีส้มสะดุดตา สำหรับโหมดศัพท์วันนี้ */}
+                    <button
+                        onClick={() => setQuizMode('today')}
+                        style={{
+                            padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease',
+                            border: '2px solid #ff8c00',
+                            backgroundColor: quizMode === 'today' ? '#ff8c00' : '#ffffff',
+                            color: quizMode === 'today' ? '#ffffff' : '#ff8c00'
+                        }}
+                    >
+                        ✨ Today's New Words
+                    </button>
                 </div>
 
-                {/* กล่องแสดงสถานะ จะเปลี่ยนสีและข้อความตามโหมดที่เลือก */}
+                {/* 🌟 กล่องแสดงสถานะ เปลี่ยนสีตามโหมดที่เลือก */}
                 <div style={{
                     marginBottom: '20px', padding: '15px', borderRadius: '8px', fontWeight: 'bold',
-                    backgroundColor: isEndlessMode ? '#d4edda' : '#f0f8ff',
-                    color: isEndlessMode ? '#155724' : '#0056b3'
+                    backgroundColor: quizMode === 'today' ? '#fff3cd' : (quizMode === 'all' ? '#d4edda' : '#f0f8ff'),
+                    color: quizMode === 'today' ? '#856404' : (quizMode === 'all' ? '#155724' : '#0056b3')
                 }}>
-                    {isEndlessMode
-                        ? `♾️ โหมดฝึกซ้อมทั้งหมด: ทำไปแล้ว ${practicedToday} ข้อในวันนี้`
-                        : `🎯 เป้าหมายวันนี้: ทำไปแล้ว ${practicedToday} / ${dailyTarget} ข้อ`
-                    }
+                    {quizMode === 'today' && `✨ โหมดศัพท์ใหม่: ทบทวนเฉพาะคำที่คุณเพิ่งเพิ่มเข้ามาในวันนี้`}
+                    {quizMode === 'all' && `♾️ โหมดฝึกซ้อมทั้งหมด: ทำไปแล้ว ${practicedToday} ข้อในวันนี้`}
+                    {quizMode === 'daily' && `🎯 เป้าหมายวันนี้: ทำไปแล้ว ${practicedToday} / ${dailyTarget} ข้อ`}
                 </div>
 
                 {/* ส่วน Filter Category และ POS */}

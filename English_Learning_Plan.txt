@@ -1,0 +1,166 @@
+word,translation,part_of_speech,category
+Ambition,ความทะเยอทะยาน,n.,word
+Convinced,เชื่ออย่างสนิทใจ,adj.,word
+Efficient,มีประสิทธิภาพ,adj.,word
+Hesitate,ลังเล,v.,word
+Maintain,รักษาไว้ / คงไว้,v.,word
+Occasion,โอกาสพิเศษ,n.,word
+Persuade,โน้มน้าว,v.,word
+Reliable,ที่เชื่อถือได้,adj.,word
+Significant,สำคัญ / อย่างมาก,adj.,word
+Make a decision,ตัดสินใจ,-,collocation
+Catch a cold,เป็นหวัด,-,collocation
+Keep a promise,รักษาคำพูด/สัญญา,-,collocation
+Take a break,พักผ่อน / พักสักครู่,-,collocation
+Save time,ประหยัดเวลา,-,collocation
+A piece of cake,ง่ายมาก,-,idiom
+Anxious,วิตกกังวล,adj.,word
+Budget,งบประมาณ,n.,word
+Consequence,ผลลัพธ์ / ผลที่ตามมา,n.,word
+Disturb,รบกวน,v.,word
+Generous,ใจกว้าง / มีน้ำใจ,adj.,word
+Guarantee,รับประกัน,v.,word
+Opportunity,โอกาส,n.,word
+Recommend,แนะนำ,v.,word
+Temporary,ชั่วคราว,adj.,word
+Do someone a favor,ช่วยเหลือ,-,collocation
+Pay attention,ตั้งใจ / ใส่ใจ,-,collocation
+Take a look,ดู / ลองดู,-,collocation
+Go on a diet,ลดน้ำหนัก / ควบคุมอาหาร,-,collocation
+Spend money,ใช้เงิน,-,collocation
+Under the weather,รู้สึกไม่สบาย,-,idiom
+Collaborate,ร่วมมือกันทำงาน,v.,word
+Productive,ที่สร้างผลงานได้มาก,adj.,word
+Candidate,ผู้สมัคร (งาน),n.,word
+Resign,ลาออก,v.,word
+Supervisor,หัวหน้างาน / ผู้ดูแล,n.,word
+Commute,เดินทางไป-กลับที่ทำงาน,v.,word
+Annual,ประจำปี,adj.,word
+Requirement,ข้อกำหนด / คุณสมบัติที่ต้องการ,n.,word
+Negotiate,เจรจาต่อรอง,v.,word
+Work remotely,ทำงานทางไกล,-,collocation
+Call in sick,โทรลาป่วย,-,collocation
+Hand in a notice,ยื่นหนังสือลาออก,-,collocation
+Fill in for someone,ทำงานแทนใครบางคนชั่วคราว,-,collocation
+Climb the career ladder,ก้าวหน้าในหน้าที่การงาน,-,collocation
+Call it a day,เลิกงาน / พอแค่นี้ก่อนสำหรับวันนี้,-,idiom
+Acquire,ซื้อกิจการ / ได้มา,v.,word
+Competitive,ที่มีการแข่งขันสูง,adj.,word
+Consumer,ผู้บริโภค,n.,word
+Expand,ขยาย (ธุรกิจ/ขอบเขต),v.,word
+Investment,การลงทุน,n.,word
+Market share,ส่วนแบ่งการตลาด,n.,word
+Outsource,จ้างบริษัทภายนอก,v.,word
+Profit,กำไร,n.,word
+Strategy,กลยุทธ์,n.,word
+Launch a product,เปิดตัวสินค้า,-,collocation
+Break even,เท่าทุน / คุ้มทุน,-,collocation
+Conduct market research,ทำวิจัยตลาด,-,collocation
+Close a deal,ปิดการขาย / บรรลุข้อตกลง,-,collocation
+Target audience,กลุ่มเป้าหมาย,-,collocation
+The big picture,ภาพรวม,-,idiom
+Consistent,สม่ำเสมอ,adj.,word
+Fluctuate,ผันผวน / ขึ้นๆ ลงๆ,v.,word
+Objective,วัตถุประสงค์ / เป้าหมาย,n.,word
+Convenient,สะดวกสบาย,adj.,word
+Enthusiastic,กระตือรือร้น,adj.,word
+Postpone,เลื่อน (เวลา) ออกไป,v.,word
+Appropriate,เหมาะสม,adj.,word
+Doubt,สงสัย / ไม่แน่ใจ,v.,word
+Sufficient,เพียงพอ,adj.,word
+Keep track of,ติดตาม / บันทึกความคืบหน้า,-,collocation
+Go for a run,ไปวิ่ง,-,collocation
+Make an effort,พยายาม / ใช้ความพยายาม,-,collocation
+Have something in common,มีบางอย่างเหมือนกัน,-,collocation
+Lose your temper,โกรธ / คุมอารมณ์ไม่อยู่,-,collocation
+Once in a blue moon,นานๆ ที,-,idiom
+Accelerate,เร่งความเร็ว,v.,word
+Circuit,สนามแข่ง (แบบวนรอบ),n.,word
+Component,ชิ้นส่วน / ส่วนประกอบ,n.,word
+Calculate,คำนวณ,v.,word
+Endurance,ความอดทน / ความทนทาน,n.,word
+Overtake,แซง,v.,word
+Penalty,บทลงโทษ / การทำโทษ,n.,word
+Precision,ความแม่นยำ,n.,word
+Spectator,ผู้ชม,n.,word
+Take the lead,ขึ้นนำ,-,collocation
+Set a record,สร้างสถิติ / ทำลายสถิติ,-,collocation
+Under pressure,ภายใต้ความกดดัน,-,collocation
+Gain an advantage,ได้เปรียบ / สร้างความได้เปรียบ,-,collocation
+Make a comeback,กลับมาประสบความสำเร็จอีกครั้ง,-,collocation
+In the driving seat,เป็นผู้ควบคุมสถานการณ์,-,idiom
+Analyze,วิเคราะห์,v.,word
+Championship,การชิงแชมป์,n.,word
+Coordinate,ประสานงาน,v.,word
+Innovative,ที่เป็นนวัตกรรมใหม่ / ล้ำสมัย,adj.,word
+Modify,ปรับเปลี่ยน / ปรับปรุง,v.,word
+Reliability,ความน่าเชื่อถือ / ความทนทาน,n.,word
+Sponsor,ผู้สนับสนุน,n.,word
+Technique,เทคนิค,n.,word
+Victory,ชัยชนะ,n.,word
+Enter a race,เข้าร่วมการแข่งขัน,-,collocation
+Gain speed,เพิ่มความเร็ว,-,collocation
+Take a risk,ยอมเสี่ยง,-,collocation
+Reach a target,บรรลุเป้าหมาย,-,collocation
+Provide support,ให้การสนับสนุน,-,collocation
+The green light,การได้รับอนุญาตให้เริ่มทำบางสิ่ง,-,idiom
+Chassis,โครงรถ / ตัวถัง,n.,word
+Qualifying,รอบคัดเลือก,n.,word
+Podium,แท่นรับรางวัล,n.,word
+Simulation,การจำลองสถานการณ์,n.,word
+Rivalry,การเป็นคู่แข่งกัน,n.,word
+Telemetry,ระบบส่งข้อมูลระยะไกล,n.,word
+Drag,แรงต้านอากาศ,n.,word
+Mechanical,ทางกลไก / ทางช่าง,adj.,word
+Suspension,ระบบกันสะเทือน,n.,word
+Make a pit stop,เข้าพิท,-,collocation
+Fastest lap,รอบที่ทำเวลาได้เร็วที่สุด,-,collocation
+Start the engine,ติดเครื่องยนต์,-,collocation
+Check the data,ตรวจสอบข้อมูล,-,collocation
+Win a title,คว้าแชมป์ / คว้าตำแหน่ง,-,collocation
+Across the finish line,ทำงานหรือภารกิจให้สำเร็จ,-,idiom
+Accommodation,ที่พัก,n.,word
+Destination,จุดหมายปลายทาง,n.,word
+Departure,การขาออก / การออกเดินทาง,n.,word
+Itinerary,แผนการเดินทาง,n.,word
+Passenger,ผู้โดยสาร,n.,word
+Recommendation,คำแนะนำ,n.,word
+Reservation,การจอง,n.,word
+Sightseeing,การเที่ยวชมสถานที่,n.,word
+Vehicle,ยานพาหนะ,n.,word
+Check in,ลงทะเบียนเข้าพัก,-,collocation
+Catch a flight,ไปให้ทันเที่ยวบิน,-,collocation
+Go abroad,ไปต่างประเทศ,-,collocation
+Board the plane,ขึ้นเครื่องบิน,-,collocation
+Book in advance,จองล่วงหน้า,-,collocation
+Hit the road,ออกเดินทาง,-,idiom
+Cancelled,ถูกยกเลิก,adj.,word
+Currency,สกุลเงิน,n.,word
+Delay,ความล่าช้า / ล่าช้า,n./v.,word
+Environment,สภาพแวดล้อม,n.,word
+Explore,สำรวจ,v.,word
+Fascinating,น่าหลงใหล / น่าดึงดูดใจมาก,adj.,word
+Insurance,ประกันภัย,n.,word
+Memorable,น่าจดจำ,adj.,word
+Souvenir,ของที่ระลึก,n.,word
+Get lost,หลงทาง,-,collocation
+Pack a suitcase,จัดกระเป๋าเดินทาง,-,collocation
+Broaden your horizons,เปิดหูเปิดตา,-,collocation
+Take a photo,ถ่ายรูป,-,collocation
+Go on a tour,ไปเที่ยวตามโปรแกรมทัวร์,-,collocation
+Off the beaten track,สถานที่ที่ผู้คนไม่ค่อยไป,-,idiom
+Breathtaking,สวยจนแทบหยุดหายใจ,adj.,word
+Compensation,เงินชดเชย,n.,word
+Eco-friendly,เป็นมิตรต่อสิ่งแวดล้อม,adj.,word
+Excursion,การเที่ยวระยะสั้น,n.,word
+Hospitality,การต้อนรับขับสู้,n.,word
+Inconvenience,ความไม่สะดวก,n.,word
+Overlook,มองเห็นวิวจากด้านบน,v.,word
+Sustainable,ยั่งยืน,adj.,word
+Transfer,การเปลี่ยนเครื่อง / รถรับส่ง,n./v.,word
+Stop over,แวะพักกลางทาง,-,collocation
+Lodge a complaint,ยื่นคำร้องเรียน,-,collocation
+Vibrant nightlife,ชีวิตยามค่ำคืนที่คึกคัก,-,collocation
+Local cuisine,อาหารท้องถิ่น,-,collocation
+Peak season,ฤดูท่องเที่ยว,-,collocation
+Travel light,เดินทางโดยนำสัมภาระไปให้น้อยที่สุด,-,idiom
