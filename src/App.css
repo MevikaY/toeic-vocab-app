@@ -1,0 +1,240 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ปรับพื้นหลังหลักให้เป็นสีเทาอ่อนเหมือนในรูป */
+body {
+  background-color: #e8e8e8;
+  color: #000000;
+}
+
+/* ---------------------------------- */
+/* สไตล์สำหรับแถบด้านบน (Header) ของแต่ละหน้า */
+/* ---------------------------------- */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  /* แถบด้านบนสีขาว */
+  padding: 20px 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* มีเงาใต้แถบ */
+}
+
+.page-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+/* ปุ่ม Back ที่มุมขวาบน */
+.btn-back {
+  padding: 8px 30px;
+  background-color: #ffffff;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------------------------------- */
+/* สไตล์สำหรับกล่อง Input และปุ่ม (ดีไซน์โค้งๆ มีเงา) */
+/* ---------------------------------- */
+.custom-input {
+  padding: 15px 20px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  /* กล่อง input มีเงา */
+  width: 100%;
+  max-width: 300px;
+  font-size: 14px;
+}
+
+.custom-btn {
+  padding: 12px 30px;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* ---------------------------------- */
+/* สไตล์สำหรับหน้า Home (หน้าแรก) */
+/* ---------------------------------- */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* ให้ความสูงเต็มหน้าจอพอดี */
+}
+
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: #ffffff;
+  z-index: 10;
+}
+
+.home-header h1 {
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sign-in-text {
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mode-btn {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+  border: 1px solid #ccc;
+}
+
+.dark-btn {
+  background-color: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.light-btn {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #dcdcdc;
+}
+
+/* ใส่รูปภาพพื้นหลัง */
+.home-main {
+  flex: 1;
+  /* ผมยืมรูปคนอ่านหนังสือฟรีจาก Unsplash มาใช้ชั่วคราวนะครับ คุณเปลี่ยน URL รูปภาพของตัวเองได้เลย */
+  background-image: url('https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=2098&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* สร้างฟิล์มสีดำบางๆ ทับรูปภาพ เพื่อให้ปุ่มสีขาวเด้งโดดเด่นขึ้นมา */
+.home-main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* กลุ่มปุ่มเมนู */
+.menu-cards-container {
+  display: flex;
+  gap: 30px;
+  position: relative;
+  /* ดันให้อยู่เหนือฟิล์มสีดำ */
+  z-index: 1;
+}
+
+/* กล่องปุ่มแต่ละอัน */
+.menu-card {
+  background-color: #ffffff;
+  width: 240px;
+  height: 150px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+  /* เอฟเฟกต์ตอนชี้เมาส์ */
+}
+
+.menu-card h2 {
+  font-size: 28px;
+  color: #000000;
+}
+
+.menu-card:hover {
+  transform: translateY(-8px);
+  /* ให้ปุ่มเด้งลอยขึ้น */
+}
+
+/* ---------------------------------- */
+/* สไตล์สำหรับตกแต่ง Calendar */
+/* ---------------------------------- */
+.calendar-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ลบกรอบเดิมของปฏิทินออก */
+.react-calendar {
+  border: none !important;
+  font-family: inherit !important;
+  width: 100% !important;
+}
+
+/* ลบขีดเส้นใต้ปุ่มเปลี่ยนเดือน */
+.react-calendar__navigation button {
+  font-size: 1.2em;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.react-calendar__navigation button:hover {
+  background-color: #f0f0f0 !important;
+}
+
+/* สีของวันปกติ */
+.react-calendar__tile {
+  padding: 15px 10px !important;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.react-calendar__tile:hover {
+  background-color: #f0f0f0 !important;
+}
+
+/* วันนี้ (Today) ให้เป็นสีเทาอ่อนๆ */
+.react-calendar__tile--now {
+  background-color: #e8e8e8 !important;
+  color: #000;
+}
+
+/* 🌟 วันที่เราเข้ามาเล่น Quiz (Streak Day) ให้เป็นสีเขียว */
+.streak-day {
+  background-color: #28a745 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+  border-radius: 50%;
+  /* ทำเป็นวงกลม */
+}
