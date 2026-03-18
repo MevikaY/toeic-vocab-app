@@ -1,0 +1,16 @@
+word,translation,part_of_speech,category
+Authentic,แท้จริง / ดั้งเดิม,adj.,word
+Transit,การผ่านแดน / การเปลี่ยนเครื่อง,n.,word
+Customs,ศุลกากร / ขนบธรรมเนียม,n.,word
+Diverse,หลากหลาย,adj.,word
+Immerse,ดื่มด่ำ / จมดิ่ง,v.,word
+Lush,เขียวชอุ่ม,adj.,word
+Unforgettable,ที่ไม่อาจลืมเลือน,adj.,word
+Venture,เสี่ยงออกไป / กล้าที่จะไป,v.,word
+Wander,เดินเที่ยวเตร่,v.,word
+Tourist trap,สถานที่ที่ดักรอนักท่องเที่ยว,-,collocation
+Go backpacking,สะพายเป้เที่ยว,-,collocation
+Cultural heritage,มรดกทางวัฒนธรรม,-,collocation
+Window seat / Aisle seat,ที่นั่งริมหน้าต่าง / ที่นั่งริมทางเดิน,-,collocation
+Direct flight,เที่ยวบินตรง,-,collocation
+Bucket list,รายการสิ่งที่ต้องทำสักครั้งในชีวิต,-,idiom

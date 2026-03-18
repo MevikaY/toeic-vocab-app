@@ -1,0 +1,16 @@
+word,translation,part_of_speech,category
+Alternative,ทางเลือก,n.,word
+Beneficial,เป็นประโยชน์,adj.,word
+Complicated,ซับซ้อน,adj.,word
+Decrease,ลดลง,v.,word
+Enormous,ใหญ่โตมโหฬาร,adj.,word
+Frequent,บ่อยครั้ง,adj.,word
+Inaccurate,ไม่ถูกต้อง / คลาดเคลื่อน,adj.,word
+Option,ตัวเลือก,n.,word
+Predict,ทำนาย / คาดการณ์,v.,word
+Do an experiment,ทำการทดลอง,-,collocation
+Break a habit,เลิกนิสัยบางอย่าง,-,collocation
+Get a scholarship,ได้รับทุนการศึกษา,-,collocation
+Keep a diary,เขียนบันทึกประจำวัน,-,collocation
+Solve a problem,แก้ปัญหา,-,collocation
+The best of both worlds,ได้ประโยชน์จากทั้งสองทาง,-,idiom
