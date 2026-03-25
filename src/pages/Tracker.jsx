@@ -98,7 +98,7 @@ export default function Tracker() {
             const calendarDateStr = `${year}-${month}-${day}`;
 
             if (streakDates.includes(calendarDateStr)) {
-                return 'highlight-streak';
+                return 'streak-day';
             }
         }
         return null;
