@@ -58,7 +58,7 @@ export default function Tracker() {
 
             // ตอนนี้ทั้ง streakDates และ calendarDateStr มีรูปแบบเดียวกัน (YYYY-MM-DD) การเปรียบเทียบนี้จะทำงานได้อย่างถูกต้อง
             if (streakDates.includes(calendarDateStr)) {
-                return 'highlight-streak'; // ชื่อคลาสสีเขียวในไฟล์ CSS ของคุณ
+                return 'streak-day'; // ชื่อคลาสสีเขียวในไฟล์ CSS ของคุณ
             }
         }
         return null;
