@@ -23,40 +23,69 @@ export default function Tracker() {
 
         if (vocabCount !== null) setTotalWords(vocabCount);
 
-        // 2. ดึงสถิติ และ ดึงวันที่ (created_at) มาด้วย
+        // 2. ดึงข้อมูลประวัติการทำควิซ (ดึงมาเก็บไว้ใน State ก่อน)
         const { data: statsData } = await supabase
             .from('daily_stats')
             .select('is_correct, created_at');
 
         if (statsData) {
-            // 🌟 แก้ปัญหา Timezone: แปลงเวลา UTC ให้เป็นเวลาเครื่องของผู้ใช้ และเก็บในรูปแบบ en-CA เป๊ะๆ
+            setAllStatsData(statsData); // เก็บข้อมูลทั้งหมดไว้เผื่อเปลี่ยน Filter
+
+            // จัดการข้อมูลปฏิทิน (ปฏิทินแสดงทั้งหมดเสมอ จะได้เห็นว่าวันไหนเข้ามาเล่นบ้าง)
             const localDates = statsData.map(item => {
-                const dateObj = new Date(item.created_at);
-                // ใช้ 'en-CA' locale เพื่อให้ได้รูปแบบ YYYY-MM-DD (เช่น '2026-03-25') ตามเวลาท้องถิ่น
-                return dateObj.toLocaleDateString('en-CA');
+                const d = new Date(item.created_at);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             });
-
-            const total = statsData.length;
-            const correct = statsData.filter(item => item.is_correct === true).length;
-            const accuracyPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
-
-            setStats({ totalAnswers: total, correctAnswers: correct, accuracy: accuracyPercent });
-
-            // 🌟 เอา localDates ที่มีรูปแบบ YYYY-MM-DD มาตัดวันซ้ำออก
             const uniqueDates = [...new Set(localDates)];
-            setStreakDates(uniqueDates); // เก็บสตริงรูปแบบ YYYY-MM-DD ไว้ใช้งาน
+            setStreakDates(uniqueDates);
+
+            // คำนวณสถิติครั้งแรกตาม timeframe ปัจจุบัน (week)
+            calculateStats(statsData, timeframe);
         }
 
         setLoading(false);
     }
 
-    // 🌟 ฟังก์ชันสำหรับเช็คว่า ปฏิทินช่องไหนตรงกับวันที่เราเคยเล่น ให้เติมคลาส CSS สีเขียวเข้าไป
+    // 🌟 ฟังก์ชันคำนวณสถิติแบบอัจฉริยะ (กรองตามเวลา)
+    function calculateStats(data, selectedTimeframe) {
+        let filteredData = data;
+        const now = new Date();
+        const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+        // กรองข้อมูลตามที่เลือก
+        if (selectedTimeframe === 'today') {
+            filteredData = data.filter(item => {
+                const itemDateStr = new Date(new Date(item.created_at).getTime() - new Date(item.created_at).getTimezoneOffset() * 60000).toISOString().split('T')[0];
+                return itemDateStr === todayStr;
+            });
+        } else if (selectedTimeframe === 'week') {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(now.getDate() - 7);
+            filteredData = data.filter(item => new Date(item.created_at) >= sevenDaysAgo);
+        } else if (selectedTimeframe === 'month') {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(now.getDate() - 30);
+            filteredData = data.filter(item => new Date(item.created_at) >= thirtyDaysAgo);
+        }
+        // ถ้าเป็น 'all' ก็ไม่ต้อง filter อะไร
+
+        const total = filteredData.length;
+        const correct = filteredData.filter(item => item.is_correct === true).length;
+        const accuracyPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+        setStats({ totalAnswers: total, correctAnswers: correct, accuracy: accuracyPercent });
+    }
+
     const tileClassName = ({ date, view }) => {
         if (view === 'month') {
-            // แปลงวันที่ของช่องปฏิทินให้เป็น YYYY-MM-DD แบบ local time เพื่อให้หน้าตาเหมือนกัน 100%
-            const calendarDateStr = date.toLocaleDateString('en-CA');
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const calendarDateStr = `${year}-${month}-${day}`;
 
-            // ตอนนี้ทั้ง streakDates และ calendarDateStr มีรูปแบบเดียวกัน (YYYY-MM-DD) การเปรียบเทียบนี้จะทำงานได้อย่างถูกต้อง
             if (streakDates.includes(calendarDateStr)) {
                 return 'streak-day'; // ชื่อคลาสสีเขียวในไฟล์ CSS ของคุณ
             }
