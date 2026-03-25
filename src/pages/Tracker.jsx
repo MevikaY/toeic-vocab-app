@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import Calendar from 'react-calendar'; // 🌟 โหลดตัวปฏิทินมาใช้
-import 'react-calendar/dist/Calendar.css'; // 🌟 โหลดสไตล์พื้นฐานของปฏิทิน
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 export default function Tracker() {
     const navigate = useNavigate();
     const [totalWords, setTotalWords] = useState(0);
     const [stats, setStats] = useState({ totalAnswers: 0, correctAnswers: 0, accuracy: 0 });
-    const [streakDates, setStreakDates] = useState([]); // 🌟 ตัวแปรเก็บ "วันที่" ที่เข้ามาเล่น
+    const [streakDates, setStreakDates] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,31 +23,48 @@ export default function Tracker() {
 
         if (vocabCount !== null) setTotalWords(vocabCount);
 
-        // 2. ดึงสถิติ และ ดึงวันที่ (created_at) มาด้วย
+        // 2. ดึงสถิติ 
+        // 🌟 แก้ปัญหาที่ 1: เพิ่ม .limit(10000) เพื่อทะลวงกำแพง 1000 แถวของ Supabase!
         const { data: statsData } = await supabase
             .from('daily_stats')
-            .select('is_correct, created_at');
+            .select('is_correct, created_at')
+            .limit(10000);
 
         if (statsData) {
+            // 🌟 แก้ปัญหาที่ 2: บังคับฟอร์แมตเวลาให้เป็น YYYY-MM-DD แบบเป๊ะๆ ไม่มีผิดเพี้ยน
+            const localDates = statsData.map(item => {
+                const d = new Date(item.created_at);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            });
+
             const total = statsData.length;
             const correct = statsData.filter(item => item.is_correct === true).length;
             const accuracyPercent = total > 0 ? Math.round((correct / total) * 100) : 0;
 
             setStats({ totalAnswers: total, correctAnswers: correct, accuracy: accuracyPercent });
 
-            // 🌟 แยกเฉพาะ "วันที่" ที่เข้ามาเล่น (ตัดเวลาทิ้ง และตัดวันซ้ำออก)
-            const dates = statsData.map(item => new Date(item.created_at).toDateString());
-            const uniqueDates = [...new Set(dates)];
+            // 🌟 เอา localDates ด้านบนมาตัดตัวซ้ำออก แล้วใช้งานได้เลย!
+            const uniqueDates = [...new Set(localDates)];
             setStreakDates(uniqueDates);
         }
 
         setLoading(false);
     }
 
-    // 🌟 ฟังก์ชันสำหรับเช็คว่า ปฏิทินช่องไหนตรงกับวันที่เราเคยเล่น ให้เติมคลาส CSS สีเขียวเข้าไป
     const tileClassName = ({ date, view }) => {
-        if (view === 'month' && streakDates.includes(date.toDateString())) {
-            return 'streak-day'; // ชื่อคลาส CSS ที่เราจะไปแต่งสีกัน
+        if (view === 'month') {
+            // 🌟 แปลงวันที่ของปฏิทินให้เป็น YYYY-MM-DD เพื่อให้หน้าตาเหมือนกัน 100%
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const calendarDateStr = `${year}-${month}-${day}`;
+
+            if (streakDates.includes(calendarDateStr)) {
+                return 'highlight-streak';
+            }
         }
         return null;
     };
@@ -66,11 +83,9 @@ export default function Tracker() {
                 {/* กล่องซ้าย: ปฏิทิน (Calendar For Show Streaks) */}
                 <div style={{ flex: '1', minWidth: '350px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <h3 style={{ marginBottom: '20px' }}>Calendar For Show Streaks</h3>
-                    {/* เรียกใช้ปฏิทินตรงนี้ */}
                     <div className="calendar-container">
                         <Calendar
                             tileClassName={tileClassName}
-                            // ปิดไม่ให้กดเลือกวันที่ได้ เพราะเราแค่ใช้ดูสถิติ
                             onClickDay={(value, event) => event.preventDefault()}
                         />
                     </div>

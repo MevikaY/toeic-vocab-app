@@ -1,0 +1,16 @@
+word,translation,part_of_speech,category
+Accurate,แม่นยำ / ถูกต้อง,adj.,word
+Complain,บ่น / ร้องเรียน,v.,word
+Encourage,สนับสนุน / ให้กำลังใจ,v.,word
+Familiar,คุ้นเคย,adj.,word
+Gradually,ค่อยๆ / ทีละน้อย,adv.,word
+Independent,พึ่งพาตัวเองได้ / อิสระ,adj.,word
+Participate,เข้าร่วม,v.,word
+Recognize,จำได้ / ตระหนักถึง,v.,word
+Valuable,มีค่า / มีประโยชน์มาก,adj.,word
+Make a mistake,ทำผิดพลาด,-,collocation
+Tell the truth,พูดความจริง,-,collocation
+Give advice,ให้คำแนะนำ,-,collocation
+Take part in,เข้าร่วม / มีส่วนร่วม,-,collocation
+Make an excuse,แก้ตัว / หาข้ออ้าง,-,collocation
+Cost an arm and a leg,แพงมาก / แพงหูฉี่,-,idiom

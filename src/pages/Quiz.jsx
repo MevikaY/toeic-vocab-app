@@ -7,11 +7,8 @@ export default function Quiz() {
     const [vocabList, setVocabList] = useState([]);
     const [mainMode, setMainMode] = useState('choice');
 
-    // ==========================================
-    // 🌟 State ใหม่สำหรับจัดการ "คำซ้ำ" และ "ปุ่ม Next"
-    // ==========================================
-    const [answeredIdsToday, setAnsweredIdsToday] = useState([]); // เก็บ ID ของคำที่ตอบไปแล้ววันนี้
-    const [isAnswered, setIsAnswered] = useState(false); // เช็คว่าตอบข้อนี้ไปหรือยัง (เพื่อโชว์ปุ่ม Next)
+    const [answeredIdsToday, setAnsweredIdsToday] = useState([]);
+    const [isAnswered, setIsAnswered] = useState(false);
 
     const [currentQuestion, setCurrentQuestion] = useState(null);
     const [choices, setChoices] = useState([]);
@@ -25,7 +22,6 @@ export default function Quiz() {
     const [practicedToday, setPracticedToday] = useState(0);
     const [quizMode, setQuizMode] = useState('daily');
 
-    // State ของ Typing Mode
     const [typingSetup, setTypingSetup] = useState(true);
     const [typingLimit, setTypingLimit] = useState(10);
     const [typingQueue, setTypingQueue] = useState([]);
@@ -59,7 +55,6 @@ export default function Quiz() {
             setAvailableCategories([...new Set(cleanData.map(item => item.category))].filter(Boolean));
             setAvailablePOS([...new Set(cleanData.map(item => item.part_of_speech))].filter(Boolean));
 
-            // 🌟 ดึงข้อมูลว่า "วันนี้" เราเคยตอบ ID ไหนไปแล้วบ้าง
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const { data: statsData } = await supabase
@@ -79,7 +74,21 @@ export default function Quiz() {
         }
     }
 
-    // 🌟 อัปเกรดความฉลาด: สุ่มคำถามโดย "ไม่เอาคำที่ตอบไปแล้ววันนี้"
+    // 🌟 ฟังก์ชันอัปเดตสถิติความจำลง Database
+    async function updateWordStats(wordId, isCorrect) {
+        const wordToUpdate = vocabList.find(w => w.id === wordId);
+        if (!wordToUpdate) return;
+
+        const newCorrect = (wordToUpdate.correct_count || 0) + (isCorrect ? 1 : 0);
+        const newWrong = (wordToUpdate.wrong_count || 0) + (!isCorrect ? 1 : 0);
+
+        // อัปเดตขึ้น Supabase
+        await supabase.from('vocabularies').update({ correct_count: newCorrect, wrong_count: newWrong }).eq('id', wordId);
+
+        // อัปเดตใน State ปัจจุบันด้วย
+        setVocabList(prev => prev.map(w => w.id === wordId ? { ...w, correct_count: newCorrect, wrong_count: newWrong } : w));
+    }
+
     function generateQuestion(allWords, filterCat, filterPOS, currentMode, currentAnsweredIds = []) {
         let filteredWords = allWords;
 
@@ -90,17 +99,12 @@ export default function Quiz() {
         if (filterCat !== 'All') filteredWords = filteredWords.filter(w => w.category === filterCat);
         if ((filterCat === 'All' || filterCat === 'Word') && filterPOS !== 'All') filteredWords = filteredWords.filter(w => w.part_of_speech === filterPOS);
 
-        // 🌟 กรองคำที่ "ตอบไปแล้ววันนี้" ออกจากการเป็นโจทย์
         let candidateQuestions = filteredWords.filter(w => !currentAnsweredIds.includes(w.id));
 
-        // ถ้าตอบครบทุกคำในหมวดนั้นๆ แล้ว
         if (candidateQuestions.length === 0) {
             setCurrentQuestion(null);
-            if (filteredWords.length > 0) {
-                setMessage('🎉 คุณฝึกคำศัพท์หมวดนี้ครบทุกคำแล้วสำหรับวันนี้! เก่งมากครับ ลองเปลี่ยนหมวดดูนะ');
-            } else {
-                setMessage(`หมวดหมู่นี้ยังไม่มีข้อมูล ไปเพิ่มข้อมูลก่อนนะครับ!`);
-            }
+            if (filteredWords.length > 0) setMessage('🎉 คุณฝึกคำศัพท์หมวดนี้ครบทุกคำแล้วสำหรับวันนี้!');
+            else setMessage(`หมวดหมู่นี้ยังไม่มีข้อมูล ไปเพิ่มข้อมูลก่อนนะครับ!`);
             return;
         }
 
@@ -113,38 +117,44 @@ export default function Quiz() {
         const randomIndex = Math.floor(Math.random() * candidateQuestions.length);
         const questionWord = candidateQuestions[randomIndex];
 
-        // คำหลอก (Distractors) สามารถเอาคำที่เคยตอบไปแล้วมาหลอกได้
-        const distractors = filteredWords.filter((w) => w.id !== questionWord.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+        // 🌟 แก้ปัญหาที่ 1: กันไม่ให้เอาคำหลอก (Distractor) ที่มีความหมาย(คำแปล)ซ้ำกับคำตอบมาโชว์ในช้อยส์
+        const distractors = filteredWords
+            .filter((w) => w.id !== questionWord.id && w.translation !== questionWord.translation)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3);
+
         const allChoices = [...distractors, questionWord].sort(() => 0.5 - Math.random());
 
         setCurrentQuestion(questionWord);
         setChoices(allChoices);
         setMessage('');
-        setIsAnswered(false); // ซ่อนปุ่ม Next เพื่อเริ่มข้อใหม่
+        setIsAnswered(false);
     }
 
-    // 🌟 ตัดระบบรอเวลาออก แล้วเปลี่ยนมาโชว์ปุ่ม Next แทน
     async function handleChoiceAnswer(selectedChoice) {
-        if (isAnswered) return; // ถ้าตอบแล้วกดซ้ำไม่ได้
+        if (isAnswered) return;
 
-        const isCorrect = selectedChoice.id === currentQuestion.id;
+        // 🌟 แก้ปัญหาที่ 1 (ในโหมดช้อยส์): ถ้าผู้ใช้กดช้อยส์ที่เป็น Synonym ถือว่าถูกด้วย!
+        const isExactMatch = selectedChoice.id === currentQuestion.id;
+        const isSynonymMatch = selectedChoice.translation === currentQuestion.translation;
+        const isCorrect = isExactMatch || isSynonymMatch;
+
         if (isCorrect) {
             setScore(score + 1);
-            setMessage('✅ ถูกต้องครับ!');
+            setMessage(isExactMatch ? '✅ ถูกต้องครับ!' : '✅ ถูกต้อง! (ความหมายเดียวกัน)');
         } else {
             setMessage(`❌ ผิดครับ! คำแปลคือ "${currentQuestion.translation}"`);
         }
 
-        setIsAnswered(true); // โชว์ปุ่ม Next
+        setIsAnswered(true);
         await supabase.from('daily_stats').insert([{ vocab_id: currentQuestion.id, is_correct: isCorrect }]);
+        updateWordStats(currentQuestion.id, isCorrect); // 🌟 บันทึกสถิติถูก/ผิด
 
-        // บันทึก ID นี้ลงในลิสต์ว่า "ตอบไปแล้วนะ"
         const newAnsweredIds = [...answeredIdsToday, currentQuestion.id];
         setAnsweredIdsToday(newAnsweredIds);
         setPracticedToday(newAnsweredIds.length);
     }
 
-    // 🌟 ฟังก์ชันสำหรับปุ่ม Next ของโหมดช้อยส์
     function handleNextQuestion() {
         if (quizMode === 'daily' && practicedToday >= dailyTarget) {
             setCurrentQuestion(null);
@@ -154,21 +164,37 @@ export default function Quiz() {
         }
     }
 
-
     // ==========================================
-    // โหมด Typing Practice (อัปเกรดให้กด Enter เปลี่ยนข้อได้เลย)
+    // โหมด Typing Practice 
     // ==========================================
     function startTypingQuiz() {
         if (vocabList.length === 0) return;
 
-        // 🌟 ในโหมด Typing ก็ไม่เอาคำที่ตอบไปแล้ววันนี้มาถามซ้ำ
-        const unseenWords = vocabList.filter(w => !answeredIdsToday.includes(w.id));
-        const pool = unseenWords.length > 0 ? unseenWords : vocabList; // ถ้าทำหมดแล้วจริงๆ ถึงจะยอมวนซ้ำ
+        let pool = vocabList;
+        if (quizMode === 'today') {
+            const todayString = new Date().toDateString();
+            pool = vocabList.filter(w => new Date(w.created_at).toDateString() === todayString);
+        } else if (quizMode === 'daily') {
+            pool = vocabList.filter(w => !answeredIdsToday.includes(w.id));
+            if (pool.length === 0) pool = vocabList;
+        }
 
-        const shuffled = [...pool].sort(() => 0.5 - Math.random());
-        const selected = typingLimit === 'All' ? shuffled : shuffled.slice(0, typingLimit);
+        // 🌟 แก้ปัญหาที่ 2: ระบบสุ่มอัจฉริยะ (Weighted Randomization)
+        // คำนวณอัตราความผิดพลาด: ยิ่งตอบผิดเยอะ (ค่าเข้าใกล้ 1) ยิ่งโดนดันขึ้นไปอยู่คิวแรกๆ
+        const calculateErrorRate = (word) => {
+            const total = (word.correct_count || 0) + (word.wrong_count || 0);
+            if (total === 0) return 0.6; // คำใหม่เอี่ยม ให้ความสำคัญปานกลางค่อนข้างสูง (0.6)
+            return (word.wrong_count || 0) / total;
+        };
 
-        setTypingQueue(selected);
+        // จัดเรียงคำศัพท์โดยเอาคำที่ Rate ผิดพลาดสูงสุดขึ้นก่อน
+        const sortedPool = [...pool].sort((a, b) => calculateErrorRate(b) - calculateErrorRate(a));
+
+        // ตัดมาตามจำนวนที่เลือก (Limit) จากนั้นค่อยสับไพ่(Shuffle) ภายในกลุ่มนั้น เพื่อไม่ให้เรียงลำดับซ้ำซากเกินไป
+        const slicedPool = typingLimit === 'All' ? sortedPool : sortedPool.slice(0, typingLimit);
+        const finalQueue = slicedPool.sort(() => 0.5 - Math.random());
+
+        setTypingQueue(finalQueue);
         setTypingIndex(0);
         setTypingScore(0);
         setTypingInput('');
@@ -179,27 +205,43 @@ export default function Quiz() {
     async function handleTypingSubmit() {
         if (!typingInput.trim() || typingFeedback) return;
 
+        const typedText = typingInput.trim().toLowerCase();
         const currentWord = typingQueue[typingIndex];
-        const isCorrect = typingInput.trim().toLowerCase() === currentWord.word.toLowerCase();
 
-        if (isCorrect) {
+        // 🌟 แก้ปัญหาที่ 1 (ในโหมดพิมพ์): เช็ค Synonym
+        const isExactMatch = typedText === currentWord.word.toLowerCase();
+
+        // ค้นหาว่าคำที่พิมพ์มา มีอยู่ในคลังศัพท์เราไหม และมีคำแปลตรงกับข้อนี้เป๊ะไหม
+        const synonymWord = vocabList.find(w =>
+            w.word.toLowerCase() === typedText &&
+            w.translation === currentWord.translation
+        );
+
+        let isCorrect = false;
+
+        if (isExactMatch) {
+            isCorrect = true;
             setTypingScore(prev => prev + 1);
             setTypingFeedback({ status: 'correct', text: '✅ เยี่ยมมาก! พิมพ์ถูกต้องครับ' });
+        } else if (synonymWord) {
+            isCorrect = true;
+            setTypingScore(prev => prev + 1);
+            setTypingFeedback({ status: 'correct', text: `✅ ถูกต้อง! (คุณพิมพ์คำพ้องความหมาย: เราอนุโลมให้ครับ)` });
         } else {
             setTypingFeedback({ status: 'wrong', text: `❌ ผิดครับ! คำที่ถูกต้องคือ: ${currentWord.word}` });
         }
 
         await supabase.from('daily_stats').insert([{ vocab_id: currentWord.id, is_correct: isCorrect }]);
+        updateWordStats(currentWord.id, isCorrect); // 🌟 บันทึกสถิติถูก/ผิด
+
         const newAnsweredIds = [...answeredIdsToday, currentWord.id];
         setAnsweredIdsToday(newAnsweredIds);
         setPracticedToday(newAnsweredIds.length);
     }
 
-    // 🌟 ฟังก์ชันข้ามไปข้อต่อไปสำหรับโหมด Typing
     function goToNextTypingWord() {
         setTypingInput('');
         setTypingFeedback(null);
-
         if (typingIndex + 1 < typingQueue.length) {
             setTypingIndex(prev => prev + 1);
             setTimeout(() => inputRef.current?.focus(), 100);
@@ -208,14 +250,10 @@ export default function Quiz() {
         }
     }
 
-    // 🌟 ดักจับปุ่ม Enter แบบฉลาดขึ้น
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            if (typingFeedback && typingFeedback.status !== 'end') {
-                goToNextTypingWord(); // ถ้าโชว์เฉลยอยู่ กด Enter เพื่อไปข้อต่อไป
-            } else if (!typingFeedback) {
-                handleTypingSubmit(); // ถ้ายังไม่เฉลย กด Enter เพื่อส่งคำตอบ
-            }
+            if (typingFeedback && typingFeedback.status !== 'end') goToNextTypingWord();
+            else if (!typingFeedback) handleTypingSubmit();
         }
     };
 
@@ -241,13 +279,21 @@ export default function Quiz() {
                         {typingSetup ? (
                             <div>
                                 <h2 style={{ marginBottom: '20px' }}>ตั้งค่าการทดสอบพิมพ์</h2>
+
+                                {/* เพิ่มตัวเลือกโหมดเข้ามาในหน้า Typing ด้วย */}
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                                    <button onClick={() => setQuizMode('daily')} style={{ padding: '8px 15px', borderRadius: '8px', border: '1px solid #ccc', backgroundColor: quizMode === 'daily' ? '#0056b3' : '#fff', color: quizMode === 'daily' ? '#fff' : '#000' }}>เป้าหมายรายวัน</button>
+                                    <button onClick={() => setQuizMode('all')} style={{ padding: '8px 15px', borderRadius: '8px', border: '1px solid #ccc', backgroundColor: quizMode === 'all' ? '#28a745' : '#fff', color: quizMode === 'all' ? '#fff' : '#000' }}>ทั้งหมด</button>
+                                    <button onClick={() => setQuizMode('today')} style={{ padding: '8px 15px', borderRadius: '8px', border: '1px solid #ccc', backgroundColor: quizMode === 'today' ? '#ff8c00' : '#fff', color: quizMode === 'today' ? '#fff' : '#000' }}>ศัพท์วันนี้</button>
+                                </div>
+
                                 <div style={{ marginBottom: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-                                    <label style={{ fontWeight: 'bold', fontSize: '1.2em' }}>เลือกระยะเวลา (จำนวนข้อ):</label>
+                                    <label style={{ fontWeight: 'bold', fontSize: '1.2em' }}>จำนวนข้อ:</label>
                                     <select value={typingLimit} onChange={(e) => setTypingLimit(e.target.value === 'All' ? 'All' : Number(e.target.value))} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '1.2em', cursor: 'pointer' }}>
                                         <option value={10}>10 คำ</option>
                                         <option value={20}>20 คำ</option>
                                         <option value={50}>50 คำ</option>
-                                        <option value="All">ทั้งหมดในคลัง</option>
+                                        <option value="All">ทั้งหมด</option>
                                     </select>
                                 </div>
                                 <button onClick={startTypingQuiz} className="custom-btn" style={{ backgroundColor: '#28a745', color: '#fff', fontSize: '1.2em', padding: '15px 40px' }}>🚀 เริ่มลุยเลย!</button>
@@ -262,24 +308,26 @@ export default function Quiz() {
                                 {typingFeedback?.status !== 'end' ? (
                                     <>
                                         <p style={{ color: '#666', fontSize: '1.2em' }}>จงพิมพ์คำแปลภาษาอังกฤษของคำว่า:</p>
-                                        <h3 style={{ fontSize: '3em', color: '#333', margin: '20px 0' }}>{typingQueue[typingIndex]?.translation}</h3>
+
+                                        {/* 🌟 แก้ปัญหาที่ 3: โชว์ POS ในหน้า Typing ด้วย */}
+                                        <h3 style={{ fontSize: '3em', color: '#333', margin: '20px 0' }}>
+                                            {typingQueue[typingIndex]?.translation}
+                                            <span style={{ fontSize: '0.4em', color: '#666', display: 'block', marginTop: '10px' }}>
+                                                ({typingQueue[typingIndex]?.category} {typingQueue[typingIndex]?.part_of_speech !== '-' && `- ${typingQueue[typingIndex]?.part_of_speech}`})
+                                            </span>
+                                        </h3>
 
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginTop: '30px' }}>
                                             <input
-                                                ref={inputRef} type="text" autoFocus autoComplete="off" placeholder="พิมพ์ภาษาอังกฤษที่นี่ แล้วกด Enter..."
+                                                ref={inputRef} type="text" autoFocus autoComplete="off" placeholder="พิมพ์ภาษาอังกฤษที่นี่..."
                                                 value={typingInput} onChange={(e) => setTypingInput(e.target.value)} onKeyDown={handleKeyDown} disabled={!!typingFeedback}
                                                 style={{ width: '100%', maxWidth: '400px', padding: '20px', fontSize: '1.5em', textAlign: 'center', borderRadius: '12px', border: '2px solid #ccc', outline: 'none' }}
                                             />
 
-                                            {/* 🌟 ปุ่มสลับระหว่าง "ส่งคำตอบ" กับ "ข้อต่อไป" */}
                                             {!typingFeedback ? (
-                                                <button onClick={handleTypingSubmit} disabled={!typingInput.trim()} className="custom-btn" style={{ width: '100%', maxWidth: '400px', backgroundColor: '#000', color: '#fff', fontSize: '1.2em' }}>
-                                                    ส่งคำตอบ (Enter)
-                                                </button>
+                                                <button onClick={handleTypingSubmit} disabled={!typingInput.trim()} className="custom-btn" style={{ width: '100%', maxWidth: '400px', backgroundColor: '#000', color: '#fff', fontSize: '1.2em' }}>ส่งคำตอบ (Enter)</button>
                                             ) : (
-                                                <button onClick={goToNextTypingWord} className="custom-btn" style={{ width: '100%', maxWidth: '400px', backgroundColor: '#0056b3', color: '#fff', fontSize: '1.2em', padding: '15px' }}>
-                                                    ข้อต่อไป ➡ (Enter)
-                                                </button>
+                                                <button onClick={goToNextTypingWord} className="custom-btn" style={{ width: '100%', maxWidth: '400px', backgroundColor: '#0056b3', color: '#fff', fontSize: '1.2em', padding: '15px' }}>ข้อต่อไป ➡ (Enter)</button>
                                             )}
                                         </div>
                                     </>
@@ -298,7 +346,7 @@ export default function Quiz() {
                 )}
 
                 {/* ============================================== */}
-                {/* โหมด MULTIPLE CHOICE */}
+                {/* โหมด MULTIPLE CHOICE (คงเดิม) */}
                 {/* ============================================== */}
                 {mainMode === 'choice' && (
                     <div style={{ textAlign: 'center' }}>
@@ -344,7 +392,7 @@ export default function Quiz() {
                                         <button
                                             key={i}
                                             onClick={() => handleChoiceAnswer(choice)}
-                                            disabled={isAnswered} // 🌟 ล็อคปุ่มช้อยส์ถ้าตอบแล้ว
+                                            disabled={isAnswered}
                                             className="custom-btn"
                                             style={{
                                                 width: '100%', padding: '15px', fontSize: '1.2em', border: '1px solid #eee',
@@ -356,7 +404,6 @@ export default function Quiz() {
                                     ))}
                                 </div>
 
-                                {/* 🌟 ปุ่ม Next โผล่มาเมื่อตอบคำถามแล้ว */}
                                 {isAnswered && (
                                     <button onClick={handleNextQuestion} className="custom-btn" style={{ marginTop: '30px', width: '100%', backgroundColor: '#0056b3', color: '#fff', fontSize: '1.3em', padding: '15px' }}>
                                         ข้อต่อไป ➡
